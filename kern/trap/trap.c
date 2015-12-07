@@ -181,8 +181,8 @@ static void handle_tlbmiss(struct trapframe* tf, int write)
     /* refill two slot */
     /* check permission */
     if(in_kernel){
-      tlb_refill(badaddr, pte); 
-    //kprintf("## refill K\n");
+      tlb_refill(badaddr, pte);
+      kprintf("## refill K\n");
       return;
     }else{
       if(!ptep_u_read(pte)){
@@ -193,7 +193,7 @@ static void handle_tlbmiss(struct trapframe* tf, int write)
         ret = -2;
         goto exit;
       }
-    //kprintf("## refill U %d %08x\n", write, badaddr);
+      kprintf("## refill U %d %08x\n", write, badaddr);
       tlb_refill(badaddr, pte);
       return ;
     }
@@ -219,9 +219,11 @@ trap_dispatch(struct trapframe *tf) {
       interrupt_handler(tf);
       break;
     case EX_TLBL:
+      kprintf("TLBL\n");
       handle_tlbmiss(tf, 0);
       break;
     case EX_TLBS:
+      kprintf("TLBS\n");
       handle_tlbmiss(tf, 1);
       break;
     case EX_RI:

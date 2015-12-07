@@ -3,7 +3,7 @@
  *
  *       Filename:  thumips_tlb.h
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  07/06/2012 10:20:30 AM
@@ -21,6 +21,7 @@
 #include <asm/mipsregs.h>
 #include <memlayout.h>
 #include <glue_pgmap.h>
+#include <stdio.h>
 
 #define THUMIPS_TLB_ENTRYL_V (1<<1)
 #define THUMIPS_TLB_ENTRYL_D (1<<2)
@@ -29,6 +30,7 @@
 
 static inline void write_one_tlb(int index, unsigned int pagemask, unsigned int hi, unsigned int low0, unsigned int low1)
 {
+	// kprintf(" !%x %x %x %x\n", index, low0, low1, hi);
 	write_c0_entrylo0(low0);
 	write_c0_pagemask(pagemask);
 	write_c0_entrylo1(low1);
@@ -67,6 +69,14 @@ static inline void tlb_refill(uint32_t badaddr, pte_t *pte)
     return ;
   if(badaddr & (1<<12))
     pte--;
+  kprintf("0x%x -> 0x%x\n",
+  	(badaddr & THUMIPS_TLB_ENTRYH_VPN2_MASK),
+	(pte2tlblow(*pte) >> 6)<<12
+  );
+  kprintf("0x%x -> 0x%x\n",
+  	((badaddr & THUMIPS_TLB_ENTRYH_VPN2_MASK))|(1<<12),
+	(pte2tlblow(*(pte+1)) >> 6)<<12
+  );
 
   static int index = 0;
   write_one_tlb(index++/*(badaddr >> 13)*/, 0, badaddr & THUMIPS_TLB_ENTRYH_VPN2_MASK,
