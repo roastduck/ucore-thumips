@@ -91,7 +91,7 @@ static void interrupt_handler(struct trapframe *tf)
   extern serial_int_handler(void*);
   int i;
   for(i=0;i<8;i++){
-    if(tf->tf_cause & tf->tf_status & (1<<(CAUSEB_IP+i))){
+    if(tf->tf_cause & (1<<(CAUSEB_IP+i))){
       switch(i){
         case TIMER0_IRQ:
           clock_int_handler(NULL);

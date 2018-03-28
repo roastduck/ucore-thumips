@@ -6,6 +6,7 @@
 #include <trap.h>
 #include <memlayout.h>
 #include <sync.h>
+#include "vga.h"
 
 /* stupid I/O delay routine necessitated by historical PC design flaws */
 static void
@@ -80,9 +81,10 @@ serial_putc_sub(int c) {
 /* serial_putc - print character to serial port */
 static void
 serial_putc(int c) {
-    if (c == '\n') {
-        serial_putc_sub('\r');
-        serial_putc_sub('\n');
+    if (c == '\b') {
+        serial_putc_sub('\b');
+        serial_putc_sub(' ');
+        serial_putc_sub('\b');
     }else {
         serial_putc_sub(c);
     }
@@ -103,6 +105,9 @@ serial_proc_data(void) {
       return -1;
     c = inw(COM1 + 0x00) & 0xFF;
 #endif
+    if (c == 127) {
+        c = '\b';
+    }
     return c;
 }
 
@@ -176,6 +181,7 @@ cons_putc(int c) {
     local_intr_save(intr_flag);
     {
         serial_putc(c);
+        vga_putc(c);
     }
     local_intr_restore(intr_flag);
 }
